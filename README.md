@@ -27,7 +27,7 @@ Every push to `main` runs `.github/workflows/deploy.yml`, which tests, builds an
 One-time setup on GitHub:
 
 1. **Settings → Pages → Build and deployment → Source:** choose **GitHub Actions**.
-2. **Settings → Secrets and variables → Actions → Variables:** add `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY` and `VITE_LOGIN_EMAIL`. These end up in the public site anyway: the publishable key is meant for browsers, and row level security protects the data.
+2. **Settings → Secrets and variables → Actions** (Variables or Secrets tab): add `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY` and `VITE_LOGIN_EMAIL`. These end up in the public site anyway: the publishable key is meant for browsers, and row level security protects the data.
 3. **Never** add `VITE_LOGIN_PASSWORD`. The deployed site shows a sign-in form, and Supabase checks your password. Auto sign-in stays local-only.
 
 The site is served at `https://<user>.github.io/<repo>/`. Sign-in uses email and password, so it needs no Supabase redirect URLs.

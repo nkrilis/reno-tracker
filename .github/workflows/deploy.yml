@@ -25,14 +25,22 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm test
-      - run: npm run build
+      - run: |
+          for name in VITE_SUPABASE_URL VITE_SUPABASE_PUBLISHABLE_KEY; do
+            if [ -z "${!name}" ]; then
+              echo "::error::$name is empty. Add it under Settings → Secrets and variables → Actions (Variables or Secrets tab)."
+              exit 1
+            fi
+          done
+          npm run build
         env:
-          # Public values (the publishable key is meant for browsers; RLS protects the data).
+          # Read from either the Variables or the Secrets tab. They end up in the public JS
+          # either way (the publishable key is meant for browsers; RLS protects the data).
           # VITE_LOGIN_PASSWORD is deliberately NOT set here: the site is public, so it
           # shows the sign-in form instead of auto-signing in.
-          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
-          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY }}
-          VITE_LOGIN_EMAIL: ${{ vars.VITE_LOGIN_EMAIL }}
+          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL || secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY || secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          VITE_LOGIN_EMAIL: ${{ vars.VITE_LOGIN_EMAIL || secrets.VITE_LOGIN_EMAIL }}
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
