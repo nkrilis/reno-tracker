@@ -26,48 +26,53 @@ export function AutoSignIn() {
   )
 }
 
+/** Email + password sign-in, used wherever no auto sign-in password is configured (e.g. the deployed site). */
 export function SignIn() {
-  const [email, setEmail] = useState('')
-  const [state, setState] = useState<'idle' | 'sending' | 'sent'>('idle')
+  const [email, setEmail] = useState(autoLogin.email)
+  const [password, setPassword] = useState('')
+  const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   async function submit(e: FormEvent) {
     e.preventDefault()
-    setState('sending')
+    setBusy(true)
     setError(null)
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: { emailRedirectTo: window.location.origin },
-    })
-    if (error) {
-      setError(error.message)
-      setState('idle')
-    } else {
-      setState('sent')
-    }
+    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    if (error) setError(error.message)
+    setBusy(false)
   }
 
   return (
     <div className="centered">
       <form className="card auth-card" onSubmit={submit}>
         <h1>Reno Tracker</h1>
-        {state === 'sent' ? (
-          <p>
-            Check <strong>{email}</strong> for a sign-in link.
-          </p>
-        ) : (
-          <>
-            <p className="muted">We'll email you a one-time sign-in link.</p>
-            <label className="field">
-              <span className="field-label">Email</span>
-              <input type="email" required autoFocus value={email} onChange={(e) => setEmail(e.target.value)} />
-            </label>
-            {error && <p className="error-text">{error}</p>}
-            <button className="btn btn-primary" disabled={state === 'sending'}>
-              {state === 'sending' ? 'Sending…' : 'Send sign-in link'}
-            </button>
-          </>
-        )}
+        <label className="field">
+          <span className="field-label">Email</span>
+          <input
+            type="email"
+            required
+            autoComplete="username"
+            autoCapitalize="none"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+        </label>
+        <label className="field">
+          <span className="field-label">Password</span>
+          <input
+            type="password"
+            required
+            autoFocus
+            autoComplete="current-password"
+            enterKeyHint="go"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+        </label>
+        {error && <p className="error-text">{error}</p>}
+        <button className="btn btn-primary" disabled={busy}>
+          {busy ? 'Signing in…' : 'Sign in'}
+        </button>
       </form>
     </div>
   )
